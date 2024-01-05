@@ -1,87 +1,4 @@
-/*
- * Create a list that holds all of your cards#
-*add each list item to the dom 
- */
-
-// Array of the card 
-const cardItems = [
-  'fa-diamond','fa-diamond', 'fa-paper-plane-o','fa-paper-plane-o', 'fa-anchor','fa-anchor',
-  'fa-bolt','fa-bolt', 'fa-cube','fa-cube', 'fa-leaf','fa-leaf', 'fa-bicycle','fa-bicycle', 'fa-bomb', 'fa-bomb'
-];
-shuffle(cardItems);
-const container = document.getElementById('game-container');
-const deck = document.createElement('ul');
-deck.classList.add('deck');
-
-// Iterate through the cardIcons array to create the LI elements
-cardItems.forEach(iconClass => {
-  // Create a new LI element with the class 'card'
-  const card = document.createElement('li');
-  card.classList.add('card');
-
-  // Create a new I element with the provided icon class
-  const icon = document.createElement('i');
-  icon.classList.add('fa', iconClass);
-
-  // Append the icon to the card
-  card.appendChild(icon);
-
-  // Append the card to the deck
-  deck.appendChild(card);
-});
-
-// Append the deck to an existing container or the body of the document
-container.appendChild(deck);
-
-
-/*
-*animate the cards moving to a sheffle deck
-*animate cards moving back to positions 
-
-*/
-function animateDeck() {
-  const cards = document.querySelectorAll('.card');
-  const container = document.querySelector('.container');
-  const deck = document.querySelector('.deck');
-  
-  // Store the initial positions of each card
-  const initialPositions = Array.from(cards).map(card => ({
-    left: card.offsetLeft,
-    top: card.offsetTop,
-  }));
-  
-  // Calculate the position for the deck formation (in this case, top-left corner)
-  const deckedTop = 10; // Adjust this value as needed
-  const deckedLeft = 10; // Adjust this value as needed
-  
-  // Apply styles to move cards to the deck formation position
-  cards.forEach((card, index) => {
-    card.classList.remove('decked-position');
-    card.style.left = `${deckedLeft}px`;
-    card.style.top = `${deckedTop}px`;
-  });
-  
-  // Wait for a short delay (e.g., 1 second)
-  setTimeout(() => {
-    // Apply styles to move cards back to their original positions
-    cards.forEach((card, index) => {
-      card.classList.add('decked-position');
-      card.style.left = `${initialPositions[index].left}px`;
-      card.style.top = `${initialPositions[index].top}px`;
-    });
-  }, 1000); // Adjust the delay time as needed
-  }
-  
-  // Event listener for triggering the animation (e.g., clicking a button)
-  const restartBtn = document.getElementById('restart');
-  restartBtn.addEventListener('click', animateDeck);
-  
-  
-  
-  
-  
-  // Shuffle function from http://stackoverflow.com/a/2450976
-  // ! MAIN FUNCTION 
+  // Shuffle function from http://stackoverflow.com/a/2450976 
   function shuffle(array) {
     let currentIndex = array.length,
     randomIndex;
@@ -101,8 +18,52 @@ function animateDeck() {
     
     return array;
   }
-  
-  
+// Array of the card 
+const cardItems = [
+  'fa-diamond','fa-diamond', 'fa-paper-plane-o','fa-paper-plane-o', 'fa-anchor','fa-anchor',
+  'fa-bolt','fa-bolt', 'fa-cube','fa-cube', 'fa-leaf','fa-leaf', 'fa-bicycle','fa-bicycle', 'fa-bomb', 'fa-bomb'
+];
+shuffle(cardItems);
+// Creating the deck of cards to display on the DOM
+const container = document.getElementById('game-container');
+const deck = document.createElement('ul');
+// Adding style class to deck
+deck.classList.add('deck');
+
+// Iterate through the cardIcons array to create the LI elements
+cardItems.forEach(iconClass => {
+  // Create a new LI element with the class 'card'
+  const card = document.createElement('li');
+  // adding style class for the cards
+  card.classList.add('card');
+
+  // Create a new I element with the provided icon class
+  const icon = document.createElement('i');
+  icon.classList.add('fa', iconClass);
+
+  // Append the icon to the card
+  card.appendChild(icon);
+
+  // Append the card to the deck
+  deck.appendChild(card);
+});
+
+// Append the deck to game-container
+container.appendChild(deck);
+
+
+// Define a variable to store the move count
+let moveCount = 0;
+
+// Select the moves element in the HTML
+const movesDisplay = document.querySelector('.moves');
+
+// Update the move count in the HTML
+function updateMoveCounter() {
+  movesDisplay.textContent = moveCount;
+}
+
+
   
   /*
   * set up the event listener for a card. If a card is clicked:
@@ -116,24 +77,72 @@ function animateDeck() {
   */
 
  const allCards = document.querySelectorAll(".card");
- 
- 
- let isToggled = false;
- allCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    if (!isToggled) {
-      // Perform an action when clicked once (for example, change background color)
-      card.classList.add("open");
-    card.classList.add("show");
-      // Update the flag to indicate the button is toggled
-      isToggled = true;
-    } else {
-      // Revert to normal state when clicked again (change back to original color)
-      card.classList.remove("open");
-    card.classList.remove("show"); // Revert to default color (or specify original color)
-      // Update the flag to indicate the button is back to normal state
-      isToggled = false;
-    }
-    
+ console.log(allCards);
+
+ function displayAndHideCard(card) {
+  const classes=card.classList.value;
+  if (classes.includes('open')) {
+    card.classList.remove('open');
+    card.classList.remove('show');
+  } else {
+    card.classList.add('open');
+    card.classList.add('show');
+  }
+ }
+
+ let openCards = [];
+ function storingOpenCards(cardItem) {
+  // Check if the card is not already in the openCards array
+  if (!openCards.includes(cardItem)) {
+    openCards.push(cardItem);
+  }
+}
+
+
+// locking card in open position function
+function lockMatchedCards() {
+  openCards.forEach((card) => {
+    card.classList.add('match');
   });
-});
+  openCards = [];
+}
+
+function checkMatchedCards() {
+  if (openCards.length === 2) {
+    const [firstCard, secondCard] = openCards;
+    const firstCardClass = firstCard.firstElementChild.className;
+    const secondCardClass = secondCard.firstElementChild.className;
+
+    if (firstCardClass === secondCardClass) {
+      lockMatchedCards();
+    } else {
+      setTimeout(() => {
+        displayAndHideCard(firstCard);
+        displayAndHideCard(secondCard);
+        openCards = [];
+      }, 1000);
+    }
+  }
+}
+
+
+
+
+// ! EVENT LISTENER FOR CARD CLICK
+ allCards.forEach((card)=>{
+  card.addEventListener('click', ()=>{
+    displayAndHideCard(card);
+    storingOpenCards(card);
+    // function to check open second open card match and then remove 
+    checkMatchedCards();
+
+    // Increment the move count and update its display
+    moveCount++;
+    updateMoveCounter();
+
+    console.log(openCards); // For debugging purposes
+  })
+ })
+
+ // Call updateMoveCounter initially to set the default value
+updateMoveCounter();
